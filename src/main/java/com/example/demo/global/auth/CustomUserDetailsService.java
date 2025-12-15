@@ -18,14 +18,13 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    public UserDetails loadUserByUsername(String providerId) throws UsernameNotFoundException {
+        User user = userRepository.findByProviderId(providerId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with providerId: " + providerId));
 
         return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
+                user.getProviderId(),
                 "", // We don't store passwords for OAuth users, so it's empty
-                Collections.singleton(new SimpleGrantedAuthority(user.getRoleKey()))
-        );
+                Collections.singleton(new SimpleGrantedAuthority(user.getRoleKey())));
     }
 }

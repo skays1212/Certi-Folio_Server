@@ -12,19 +12,19 @@ spring:
             client-secret: CfyATwp7dulMr1oCt8mk8BwUjd7NkO8I
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
-            redirect-uri: "http://192.168.1.27:8080/auth/callback"
+            redirect-uri: "https://e3d437be9265.ngrok-free.app/login/oauth2/code/kakao"
             client-name: Kakao
 
           # --- 네이버 설정 ---
           naver:
             client-id: NOFlU7zhykC677WPYXKl
-            client-secret: NOFlU7zhykC677WPYXKl
+            client-secret: R3qLXek3Ov
+            client-authentication-method: client_secret_post
             scope:
-              - name
-              - email
+              - profile
             client-name: Naver
             authorization-grant-type: authorization_code
-            redirect-uri: "http://192.168.1.27:8080/auth/callback"
+            redirect-uri: "https://e3d437be9265.ngrok-free.app/login/oauth2/code/naver"
 
         # --- Provider 상세 정보 (직접 등록 필요) ---
         provider:
@@ -47,10 +47,9 @@ jwt:
 # 프론트엔드 설정
 app:
   frontend:
-    url: http://192.168.1.106:3000
+    url: http://localhost:3000
   oauth2:
-    authorized-redirect-uri: http://192.168.1.106:3000/auth/callback
+    authorized-redirect-uri: http://localhost:3000/auth/callback
 
 server:
-  address: 192.168.1.27
   port: 8080
