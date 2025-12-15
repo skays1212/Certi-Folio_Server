@@ -27,15 +27,16 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     private String redirectUri;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+            Authentication authentication) throws IOException, ServletException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
-        // 이메일 추출 (카카오, 네이버 각각 다른 구조)
-        String email = extractEmail(oAuth2User);
-        
-        log.info("OAuth2 로그인 성공 - email: {}", email);
+        // providerId 추출 (CustomOAuth2UserService에서 설정한 값 사용)
+        String providerId = extractProviderId(oAuth2User);
 
-        String accessToken = jwtTokenProvider.createAccessToken(email);
+        log.info("OAuth2 로그인 성공 - providerId: {}", providerId);
+
+        String accessToken = jwtTokenProvider.createAccessToken(providerId);
 
         // 프론트엔드로 리다이렉트 (설정에서 URL 읽어옴)
         String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
@@ -43,24 +44,34 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 .build().toUriString();
 
         log.info("리다이렉트 URL: {}", targetUrl);
-        
+
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 
-    private String extractEmail(OAuth2User oAuth2User) {
-        // 카카오의 경우
-        Map<String, Object> kakaoAccount = oAuth2User.getAttribute("kakao_account");
-        if (kakaoAccount != null) {
-            return (String) kakaoAccount.get("email");
+    private String extractProviderId(OAuth2User oAuth2User) {
+        // CustomOAuth2UserService에서 설정한 providerId를 먼저 확인
+        String providerId = oAuth2User.getAttribute("providerId");
+        if (providerId != null) {
+            return providerId;
         }
 
-        // 네이버의 경우
+        // Fallback: 직접 추출 (혹시 모를 경우를 대비)
+        @SuppressWarnings("unchecked")
         Map<String, Object> naverResponse = oAuth2User.getAttribute("response");
-        if (naverResponse != null) {
-            return (String) naverResponse.get("email");
+        if (naverResponse != null && naverResponse.get("id") != null) {
+            return "naver_" + naverResponse.get("id");
         }
 
-        // 기본 (구글 등)
-        return oAuth2User.getAttribute("email");
+        Object kakaoId = oAuth2User.getAttribute("id");
+        if (kakaoId != null) {
+            return "kakao_" + kakaoId;
+        }
+
+        String sub = oAuth2User.getAttribute("sub");
+        if (sub != null) {
+            return sub;
+        }
+
+        throw new IllegalArgumentException("Cannot extract provider ID from OAuth2User");
     }
 }
