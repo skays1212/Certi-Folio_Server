@@ -53,3 +53,7 @@ app:
 
 server:
   port: 8080
+
+# Jackson JSON 직렬화 설정 (프론트엔드와 snake_case 맞춤)
+spring.jackson:
+  property-naming-strategy: SNAKE_CASE

@@ -1,5 +1,7 @@
 package com.example.demo.global.auth;
 
+import com.example.demo.domain.user.entity.User;
+import com.example.demo.domain.user.repository.UserRepository;
 import com.example.demo.global.jwt.JwtTokenProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +24,7 @@ import java.util.Map;
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
 
     @Value("${app.oauth2.authorized-redirect-uri}")
     private String redirectUri;
@@ -36,7 +39,14 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         log.info("OAuth2 로그인 성공 - providerId: {}", providerId);
 
-        String accessToken = jwtTokenProvider.createAccessToken(providerId);
+        // DB에서 사용자 조회하여 userId 획득
+        User user = userRepository.findByProviderId(providerId)
+                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다: " + providerId));
+
+        // userId를 포함한 토큰 생성
+        String accessToken = jwtTokenProvider.createAccessToken(user.getId(), providerId);
+
+        log.info("JWT 토큰 생성 - userId: {}, providerId: {}", user.getId(), providerId);
 
         // 프론트엔드로 리다이렉트 (설정에서 URL 읽어옴)
         String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
