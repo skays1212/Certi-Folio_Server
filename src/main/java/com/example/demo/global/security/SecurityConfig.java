@@ -68,7 +68,7 @@ public class SecurityConfig {
                                 "http://localhost:3000",
                                 "http://localhost:8080",
                                 "http://192.168.1.27:8080",
-                                "https://tippable-asha-slaggier.ngrok-free.dev"));
+                                "https://clair-noninflationary-indefinately.ngrok-free.dev"));
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                 configuration.setAllowedHeaders(Arrays.asList("*"));
                 configuration.setAllowCredentials(true);
